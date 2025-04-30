@@ -96,14 +96,14 @@ dog_surface = dog_frames[dog_index]
 
 
 # Timers
-rain_animation = pygame.USEREVENT + 1
-pygame.time.set_timer(rain_animation,300)
-
 player_animation = pygame.USEREVENT + 2
 pygame.time.set_timer(player_animation,200)
 
 animal_animation = pygame.USEREVENT + 3
 pygame.time.set_timer(animal_animation,300)
+
+# Used to control delay for rate of animals
+loop_start_time = pygame.time.get_ticks()
 
 
 # Game loop
@@ -129,11 +129,12 @@ while True:
             if xcord >=700 and xcord <=950:
                 player_r.midbottom = (pos3,ground)
  
-
         # Append either a cat or a dog to the list 
         # of cats and dog rectangles.
-        if event.type == rain_animation:
-            animal_position = choice(pos_list)
+        # Had to add a delay as default rate was a deluge
+        animal_position = choice(pos_list)
+        now = pygame.time.get_ticks()
+        if now - loop_start_time >= randint(900,1500):
             if randint(0,2):
                 animal_r_list.append(dog1_s.get_rect(midbottom = ((animal_position),randint(neg_top_r2,neg_top_r1))))
             else:
