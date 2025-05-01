@@ -10,6 +10,11 @@ screen =  pygame.display.set_mode((1000,800))
 pygame.display.set_caption("It's Raining Cats and Dogs")
 clock = pygame.time.Clock()
 
+# Keyboard delay
+keyboard_delay = 100
+keyboard_time = pygame.time.get_ticks() + keyboard_delay
+
+
 def animal_rain(animal_r_list,dog_index,cat_index):
     """
         Controls which animal is displayed from 
@@ -128,6 +133,25 @@ while True:
                 player_r.midbottom = (pos2,ground)
             if xcord >=700 and xcord <=950:
                 player_r.midbottom = (pos3,ground)
+
+        if event.type == pygame.KEYDOWN:
+            if pygame.time.get_ticks() >= keyboard_time:
+                keyboard_time = pygame.time.get_ticks() + keyboard_delay
+                if event.key == pygame.K_LEFT:
+                    if player_r.midbottom == (pos1,ground):
+                        pass
+                    if player_r.midbottom == (pos2,ground):
+                        player_r.midbottom = (pos1,ground)
+                    if player_r.midbottom == (pos3,ground):
+                        player_r.midbottom = (pos2,ground)
+            
+                elif event.key == pygame.K_RIGHT:
+                    if player_r.midbottom == (pos3,ground):
+                        pass
+                    if player_r.midbottom == (pos2,ground):
+                        player_r.midbottom = (pos3,ground)
+                    if player_r.midbottom == (pos1,ground):
+                        player_r.midbottom = (pos2,ground)
  
         # Append either a cat or a dog to the list 
         # of cats and dog rectangles.
