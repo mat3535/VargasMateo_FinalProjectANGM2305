@@ -70,6 +70,10 @@ neg_top_r2 = -500
 # Animal list for rain
 animal_r_list=[]
 
+# Collision tracking
+catches = 0
+misses = 0
+
 # Background graphics
 ground_s = pygame.image.load('graphics/floor.png').convert()
 ground_r = ground_s.get_rect(midtop = (500,550))
@@ -187,6 +191,20 @@ while True:
 
         # Make it rain cats and dogs
         animal_r_list = animal_rain(animal_r_list,dog_index,cat_index)
+
+        # Count collisions (catches and misses)
+        # - Catches are collisions between an animal rectangle and the player's rectangle
+        # - Misses are collisions between an animal rectangle and the ground rectangle
+        # Removed the rectacle from the list when a collision occurs to make it dissapear
+        for animal_r in animal_r_list:
+            if player_r.colliderect(animal_r):
+                animal_r_list.remove(animal_r)
+                catches += 1
+            elif  animal_r.colliderect(ground_r):
+                animal_r_list.remove(animal_r)
+                misses += 1
+        
+        print(f'catches={catches} misses={misses}')
 
     pygame.display.update()
     clock.tick(60)
