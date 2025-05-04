@@ -9,6 +9,9 @@ pygame.init()
 screen =  pygame.display.set_mode((1000,800))
 pygame.display.set_caption("It's Raining Cats and Dogs")
 clock = pygame.time.Clock()
+game_font = pygame.font.Font("font/Pixeltype.ttf", 50)
+text_color = (65,65,65)
+speed_rate = 3
 
 # Keyboard delay
 keyboard_delay = 100
@@ -33,10 +36,20 @@ def animal_rain(animal_r_list,dog_index,cat_index):
 
         returns animal_r_list
     """
+    # Increase animal drop speed every minute
+    global speed_start_time
+    global speed_rate
+    now = pygame.time.get_ticks()
+    if now - speed_start_time < 60000:
+        pass
+    else:
+        speed_rate += 1
+        speed_start_time = pygame.time.get_ticks()
+
     if animal_r_list:
         print(f'animal_r_list={animal_r_list}')
         for animal_r in animal_r_list:
-            animal_r.y += 5
+            animal_r.y += randint(speed_rate,speed_rate+1)
             if animal_r.height == 201:
                 screen.blit(dog_frames[dog_index],animal_r)
             else:
@@ -47,6 +60,17 @@ def animal_rain(animal_r_list,dog_index,cat_index):
         return animal_r_list
     else:
         return []
+    
+def show_score(catches, misses):
+    catches_pos = (30,750)
+    misses_pos = (970,750)
+    catches_s = game_font.render(f'Catches: {catches}',False,text_color)
+    catches_r = catches_s.get_rect(midleft = catches_pos)
+    misses_s = game_font.render(f'Misses: {misses}',False,text_color)
+    misses_r = misses_s.get_rect(midright = misses_pos)
+
+    screen.blit(catches_s,catches_r)
+    screen.blit(misses_s,misses_r)
 
 # Control variables
 # Top and ground
@@ -113,6 +137,7 @@ pygame.time.set_timer(animal_animation,300)
 
 # Used to control delay for rate of animals
 loop_start_time = pygame.time.get_ticks()
+speed_start_time = pygame.time.get_ticks()
 
 
 # Game loop
@@ -195,7 +220,8 @@ while True:
         # Count collisions (catches and misses)
         # - Catches are collisions between an animal rectangle and the player's rectangle
         # - Misses are collisions between an animal rectangle and the ground rectangle
-        # Removed the rectacle from the list when a collision occurs to make it dissapear
+        # Removed the rectacle from the list when a collision occurs to make the
+        # caught animal dissapear
         for animal_r in animal_r_list:
             if player_r.colliderect(animal_r):
                 animal_r_list.remove(animal_r)
@@ -204,7 +230,8 @@ while True:
                 animal_r_list.remove(animal_r)
                 misses += 1
         
-        print(f'catches={catches} misses={misses}')
+        # Show catches and misses on screen
+        show_score(catches,misses)
 
     pygame.display.update()
     clock.tick(60)
