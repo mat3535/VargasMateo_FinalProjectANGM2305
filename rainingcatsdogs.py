@@ -187,7 +187,7 @@ while True:
         # Had to add a delay as default rate was a deluge
         animal_position = choice(pos_list)
         now = pygame.time.get_ticks()
-        if now - loop_start_time >= randint(900,1500):
+        if now - loop_start_time >= randint(800,1200) or len(animal_r_list) == 1:
             if randint(0,2):
                 animal_r_list.append(dog1_s.get_rect(midbottom = ((animal_position),randint(neg_top_r2,neg_top_r1))))
             else:
