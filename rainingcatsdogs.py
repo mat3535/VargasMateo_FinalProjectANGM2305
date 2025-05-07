@@ -19,6 +19,13 @@ speed_rate = 3
 keyboard_delay = 100
 keyboard_time = pygame.time.get_ticks() + keyboard_delay
 
+# Sounds
+cat_sound = pygame.mixer.Sound('audio/meow.mp3')
+dog_sound = pygame.mixer.Sound('audio/bark.mp3')
+oops_sound = pygame.mixer.Sound('audio/oops.mp3')
+fail_sound = pygame.mixer.Sound('audio/fail.mp3')
+
+
 def animate_player(curr_player_xcord,position):
     """
 
@@ -39,9 +46,9 @@ def animate_player(curr_player_xcord,position):
                 player_index = 1
             elif player_index == 1:
                 player_index = 0
-            elif player_index == 3:
+            elif player_index == 2:
                 player_index = 1
-            elif player_index == 4:
+            elif player_index == 3:
                 player_index = 0
     elif position == pos2:
         # In position 2 we need to face in the direction we are coming from
@@ -75,7 +82,6 @@ def animate_player(curr_player_xcord,position):
                 player_index = 3
             elif player_index == 3:
                 player_index = 2
-
 
 def animal_rain(animal_r_list,dog_index,cat_index):
     """
@@ -220,6 +226,12 @@ pygame.time.set_timer(animal_animation,200)
 loop_start_time = pygame.time.get_ticks()
 speed_start_time = pygame.time.get_ticks()
 
+# Initialize sound mixer
+pygame.mixer.pre_init(48000, -16, 1, 1024)
+pygame.mixer.init()
+played_already = 0
+
+
 # Game loop
 while True:
     for event in pygame.event.get():
@@ -228,10 +240,12 @@ while True:
             exit()
 
     if rungame:
+        played_already = 0
 
         # Draw background graphics
         screen.blit(ground_s,(0,ground))
         screen.blit(back_s,(0,0))
+
 
         # Mouse clicks for player position control / game restart
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -311,10 +325,15 @@ while True:
         # Remove the rectacle from the list when a collision occurs to make it dissapear
         for animal_r in animal_r_list:
             if player_r.colliderect(animal_r):
+                if animal_r.height == 201:
+                    dog_sound.play(loops=0)
+                else:
+                    cat_sound.play(loops=0)
                 animal_r_list.remove(animal_r)
                 catches += 1
             elif animal_r.colliderect(ground_r):
                 animal_r_list.remove(animal_r)
+                oops_sound.play(loops=0)
                 misses += 1
 
             # Show catches and misses on screen
@@ -328,6 +347,12 @@ while True:
         screen.fill((0,0,0))
 
         if catches != 0:
+
+            # Stop background music
+            if not played_already:
+                fail_sound.play(loops = 0)
+                played_already = 1
+
             # Show final scores
             show_score(catches,misses)
 
@@ -342,17 +367,23 @@ while True:
             screen.blit(welcome_s,welcome_r)
 
             instructions0_s = game_font.render("How to play:",False,text_color)
-            instructions0_r = instructions0_s.get_rect(midbottom = (500,450))
-            instructions1_s = game_font.render("1. Click to move the player to the desired catch position.",False,text_color)
-            instructions1_r = instructions1_s.get_rect(midbottom = (500,500))
-            instructions2_s = game_font.render("2. Don't let them drop!",False,text_color)
-            instructions2_r = instructions2_s.get_rect(midbottom = (500,550))
+            instructions0_r = instructions0_s.get_rect(bottomleft = (200,450))
+            instructions1_s = game_font.render("1. Move the player to catch the animals:",False,text_color)
+            instructions1_r = instructions1_s.get_rect(bottomleft = (200,500))
+            instructions2_s = game_font.render("   - Click under the desired catch position",False,text_color)
+            instructions2_r = instructions2_s.get_rect(bottomleft = (250,550))
+            instructions3_s = game_font.render("   - Or use the Left or Right arrow keys",False,text_color)
+            instructions3_r = instructions3_s.get_rect(bottomleft = (250,600))
+            instructions4_s = game_font.render("2. Don't let more than 3 drop!",False,text_color)
+            instructions4_r = instructions4_s.get_rect(bottomleft = (200,650))
             screen.blit(instructions0_s,instructions0_r)
             screen.blit(instructions1_s,instructions1_r)
             screen.blit(instructions2_s,instructions2_r)
+            screen.blit(instructions3_s,instructions3_r)
+            screen.blit(instructions4_s,instructions4_r)
 
             start_s = game_font.render('Press spacebar to start playing!',False,text_color)
-            start_r = start_s.get_rect(midbottom = (500,650))
+            start_r = start_s.get_rect(midbottom = (500,700))
             screen.blit(start_s,start_r)
 
         # Show player and animal graphics on final screen
@@ -377,6 +408,9 @@ while True:
             speed_start_time = pygame.time.get_ticks()
             # Restart game
             rungame = True
+            # Play background music
+            pygame.mixer.music.load('audio/bgmusic.mp3')
+            pygame.mixer.music.play(loops = -1)
 
     pygame.display.update()
     clock.tick(60)
