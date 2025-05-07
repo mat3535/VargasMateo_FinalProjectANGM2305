@@ -19,6 +19,63 @@ speed_rate = 3
 keyboard_delay = 100
 keyboard_time = pygame.time.get_ticks() + keyboard_delay
 
+def animate_player(curr_player_xcord,position):
+    """
+
+    The player's frames are in a list with 2 left frames and 2 right frames, indexes
+    0 - 3. This function controls the player frame shown based on original
+    position, and target position to simulate animation. 
+    
+    curr_player_xcord - value of x coordinate of player rectangle current position
+
+    position - player target position 
+    
+    """
+    global player_index
+    
+    if position == pos1:
+        # In position 1 we always face right (index 0 or 1)
+            if player_index == 0:
+                player_index = 1
+            elif player_index == 1:
+                player_index = 0
+            elif player_index == 3:
+                player_index = 1
+            elif player_index == 4:
+                player_index = 0
+    elif position == pos2:
+        # In position 2 we need to face in the direction we are coming from
+        # If comming from pos 1 we need to face right  (index 0 or 1)
+        if curr_player_xcord < pos2 - 100:
+            if player_index == 0:
+                player_index = 1
+            elif player_index == 1:
+                player_index = 0
+            elif player_index == 2:
+                player_index = 1
+            elif player_index == 3:
+                player_index = 0
+        # If coming from pos 3 we need to face left (index 2 or 3)
+        elif curr_player_xcord > pos2 - 100:
+            if player_index == 0:
+                player_index = 3
+            elif player_index == 1:
+                player_index = 2
+            elif player_index == 2:
+                player_index = 3
+            elif player_index == 3:
+                player_index = 2
+    elif position == pos3:
+        # In position 3 we always face left (index 2 or 3)
+            if player_index == 0:
+                player_index = 3
+            elif player_index == 1:
+                player_index = 2
+            elif player_index == 2:
+                player_index = 3
+            elif player_index == 3:
+                player_index = 2
+
 
 def animal_rain(animal_r_list,dog_index,cat_index):
     """
@@ -51,7 +108,6 @@ def animal_rain(animal_r_list,dog_index,cat_index):
         speed_start_time = pygame.time.get_ticks()
 
     if animal_r_list:
-        print(f'animal_r_list={animal_r_list}')
         for animal_r in animal_r_list:
             animal_r.y += randint(speed_rate,speed_rate+1)
             if animal_r.height == 201:
@@ -131,12 +187,13 @@ ground_r = ground_s.get_rect(midtop = (500,550))
 back_s = pygame.image.load('graphics/top.png').convert()
 
 # Player  graphics
-player1_s = pygame.image.load('graphics/Player/stand_boy.png').convert_alpha()
-player_r = player1_s.get_rect(midbottom = (pos2,ground))
-player2_s = pygame.image.load('graphics/Player/squat_boy.png').convert_alpha()
-player_frames = [player1_s, player2_s]
+player1r_s = pygame.image.load('graphics/Player/stand_boy_right.png').convert_alpha()
+player_r = player1r_s.get_rect(midbottom = (pos2,ground))
+player2r_s = pygame.image.load('graphics/Player/squat_boy_right.png').convert_alpha()
+player1l_s = pygame.image.load('graphics/Player/stand_boy_left.png').convert_alpha()
+player2l_s = pygame.image.load('graphics/Player/squat_boy_left.png').convert_alpha()
+player_frames = [player1r_s, player2r_s, player1l_s, player2l_s]
 player_index = 0
-player_surface = player_frames[player_index]
 
 # Cat graphics
 cat1_s = pygame.image.load('graphics/Player/cat_wag1.png').convert_alpha()
@@ -156,9 +213,6 @@ dog_surface = dog_frames[dog_index]
 
 
 # Timers
-player_animation = pygame.USEREVENT + 2
-pygame.time.set_timer(player_animation,200)
-
 animal_animation = pygame.USEREVENT + 3
 pygame.time.set_timer(animal_animation,200)
 
@@ -182,32 +236,43 @@ while True:
         # Mouse clicks for player position control / game restart
         if event.type == pygame.MOUSEBUTTONDOWN:
             (xcord, ycord) = pygame.mouse.get_pos()
+            curr_player_xcord = player_r.x 
             if xcord >=50 and xcord <= 350:
                 player_r.midbottom = (pos1,ground)
+                animate_player(curr_player_xcord, pos1)
             if xcord >= 351 and xcord <= 699:
                 player_r.midbottom = (pos2,ground)
+                animate_player(curr_player_xcord, pos2)
             if xcord >=700 and xcord <=950:
                 player_r.midbottom = (pos3,ground)
+                animate_player(curr_player_xcord, pos3)
  
         
         if event.type == pygame.KEYDOWN:
             if pygame.time.get_ticks() >= keyboard_time:
                 keyboard_time = pygame.time.get_ticks() + keyboard_delay
+                curr_player_xcord = player_r.x 
                 if event.key == pygame.K_LEFT:
                     if player_r.midbottom == (pos1,ground):
+                        animate_player(curr_player_xcord, pos1)
                         pass
                     if player_r.midbottom == (pos2,ground):
                         player_r.midbottom = (pos1,ground)
+                        animate_player(curr_player_xcord, pos1)
                     if player_r.midbottom == (pos3,ground):
                         player_r.midbottom = (pos2,ground)
+                        animate_player(curr_player_xcord, pos2)
             
                 elif event.key == pygame.K_RIGHT:
                     if player_r.midbottom == (pos3,ground):
+                        animate_player(curr_player_xcord, pos3)
                         pass
                     if player_r.midbottom == (pos2,ground):
                         player_r.midbottom = (pos3,ground)
+                        animate_player(curr_player_xcord, pos3)
                     if player_r.midbottom == (pos1,ground):
                         player_r.midbottom = (pos2,ground)
+                        animate_player(curr_player_xcord, pos2)
 
         # Append either a cat or a dog to the list 
         # of cats and dog rectangles.
@@ -223,12 +288,6 @@ while True:
                 animal_r_list.append(cat1_s.get_rect(midbottom = ((animal_position),randint(neg_top_r2,neg_top_r1))))
             loop_start_time = pygame.time.get_ticks()
 
-        # Animate and show player
-        if event.type == player_animation:
-            if player_index == 0: 
-                player_index = 1
-            else: 
-                player_index = 0
         player_s = player_frames[player_index]
         screen.blit(player_s,player_r)
         
@@ -253,10 +312,8 @@ while True:
         for animal_r in animal_r_list:
             if player_r.colliderect(animal_r):
                 animal_r_list.remove(animal_r)
-                #if len(animal_r_list) > 1:
                 catches += 1
-            elif  animal_r.colliderect(ground_r):
-                #if len(animal_r_list) > 1:
+            elif animal_r.colliderect(ground_r):
                 animal_r_list.remove(animal_r)
                 misses += 1
 
@@ -302,8 +359,8 @@ while True:
         dog1_r = dog1_s.get_rect(midbottom =  (pos1,300))
         screen.blit(dog1_s,dog1_r)
 
-        player1_r = player1_s.get_rect(midbottom = (pos2,300))
-        screen.blit(player1_s,player1_r)
+        player1_r = player1r_s.get_rect(midbottom = (pos2,300))
+        screen.blit(player1r_s,player1_r)
 
         cat1_r = cat1_s.get_rect(midbottom = (pos3,300))
         screen.blit(cat1_s,cat1_r)
