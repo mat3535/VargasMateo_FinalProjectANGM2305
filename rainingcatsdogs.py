@@ -12,7 +12,7 @@ clock = pygame.time.Clock()
 game_font = pygame.font.Font("font/Pixeltype.ttf", 50)
 large_font = pygame.font.Font("font/Pixeltype.ttf", 70)
 title_text_color = (255,255,255)
-text_color = (65,65,65)
+text_color = (0,0,0)
 speed_rate = 3
 
 # Keyboard delay
