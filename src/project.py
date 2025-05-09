@@ -33,6 +33,7 @@ def main():
     top = 0
     global ground
     ground = 700
+    
 
     # Column positions
     global pos1, pos2, pos3
@@ -216,7 +217,9 @@ def main():
                 rungame = False
         else:
             # This is the end screen
-            screen.fill((0,0,0))
+            #screen.fill((0,0,0))
+            start_back_s = pygame.image.load('graphics/startscreen.png').convert()
+            screen.blit(start_back_s, (0,0))
 
             if catches != 0:
 
